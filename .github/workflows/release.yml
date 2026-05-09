@@ -1,0 +1,49 @@
+name: Create Release and Checksum
+
+on:
+  push:
+    tags:
+      - 'v*' # Berjalan hanya jika Anda push tag seperti v1.0.0
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: sudo apt-get install -y autoconf automake
+
+    - name: Prepare Source Tarball
+      run: |
+        # Membuat file tar.gz dari source code
+        export PKG_NAME=mtd
+        export PKG_VER=${{ github.ref_name }}
+        tar -cvzf ${PKG_NAME}-${PKG_VER}.tar.gz --exclude='.git*' .
+
+    - name: Generate SHA256 Checksum
+      run: |
+        sha256sum mtd-${{ github.ref_name }}.tar.gz > checksum.txt
+        echo "SHA256 Checksum for Termux build.sh:"
+        cat checksum.txt
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          mtd-${{ github.ref_name }}.tar.gz
+          checksum.txt
+        body: |
+          ## MTD Release ${{ github.ref_name }}
+          **SHA256 Checksum for termux-packages:**
+          ```
+          $(cat checksum.txt)
+          ```
+
+          Gunakan checksum di atas untuk memperbarui `build.sh` di termux-packages.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

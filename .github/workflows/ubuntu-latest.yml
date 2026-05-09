@@ -1,0 +1,61 @@
+name: C/C++ CI (mtd build)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y autoconf automake make gcc
+
+    - name: Generate configure script
+      run: autoconf
+
+    - name: Configure and Build
+      run: |
+        ./configure
+        make
+
+    - name: Install mtd to System
+      run: sudo make install
+
+    - name: Verify mtd Command
+      run: |
+        # Memastikan 'mtd' bisa dipanggil dari mana saja tanpa ./
+        which mtd
+        mtd --help || true
+
+    - name: Run Functional Test
+      run: |
+        mkdir -p source_dir dest_dir
+        echo "Pilot, mission start!" > source_dir/mission.txt
+        
+        # Menggunakan mtd sebagai command global
+        mtd source_dir/* dest_dir/
+        
+        if [ -f dest_dir/mission.txt ]; then
+          echo "Success: mtd command executed globally and moved the file."
+        else
+          echo "Failure: mtd command failed to move the file."
+          exit 1
+        fi
+
+    - name: Upload Binary to Release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./mtd
+        asset_name: mtd-linux-amd64
+        tag: ${{ github.ref }}
+        overwrite: true

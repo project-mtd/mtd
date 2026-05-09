@@ -1,0 +1,53 @@
+# @configure_input@
+
+# Package information
+package      = @PACKAGE_NAME@
+version      = @PACKAGE_VERSION@
+tarname      = @PACKAGE_TARNAME@
+distdir      = $(tarname)-$(version)
+
+# Standard installation directories
+prefix       = @prefix@
+exec_prefix  = @exec_prefix@
+bindir       = @bindir@
+
+# Compiler and Flags
+CC           = @CC@
+CFLAGS       = @CFLAGS@ -I.
+LDFLAGS      = @LDFLAGS@
+INSTALL      = @INSTALL@
+
+# Source and Objects
+SRCS         = main.c mtd.c generator.c exclude.c receiver.c options.c
+OBJS         = $(SRCS:.c=.o)
+TARGET       = mtd
+
+.PHONY: all clean install uninstall dist distclean
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(TARGET) $(OBJS)
+
+%.o: %.c mtd.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+install: all
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) $(TARGET) $(DESTDIR)$(bindir)/$(TARGET)
+
+uninstall:
+	rm -f $(DESTDIR)$(bindir)/$(TARGET)
+
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+distclean: clean
+	rm -f Makefile config.status config.log config.cache
+	rm -rf autom4te.cache
+
+dist:
+	mkdir $(distdir)
+	cp $(SRCS) mtd.h Makefile.in configure.ac $(distdir)
+	tar -cvzf $(distdir).tar.gz $(distdir)
+	rm -rf $(distdir)
