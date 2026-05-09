@@ -1,5 +1,5 @@
-#ifndef MTD_H
-#define MTD_H
+#ifndef MVTD_H
+#define MVTD_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,13 +15,13 @@ typedef struct {
     bool verbose;
     bool dry_run;
     char *exclude_pattern;
-} mtd_options;
+} mvtd_options;
 
 // Module Prototypes
-void parse_options(int argc, char *argv[], mtd_options *opts);
-bool should_exclude(const char *path, mtd_options *opts);
+void parse_options(int argc, char *argv[], mvtd_options *opts);
+bool should_exclude(const char *path, mvtd_options *opts);
 bool generator_should_move(const char *src, const char *dest);
-int receiver_move(const char *src, const char *dest, mtd_options *opts);
-void mtd_process(const char *src, const char *dest, mtd_options *opts);
+int receiver_move(const char *src, const char *dest, mvtd_options *opts);
+void mvtd_process(const char *src, const char *dest, mvtd_options *opts);
 
 #endif

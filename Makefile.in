@@ -18,9 +18,9 @@ LDFLAGS      = @LDFLAGS@
 INSTALL      = @INSTALL@
 
 # Source and Objects
-SRCS         = main.c mtd.c generator.c exclude.c receiver.c options.c
+SRCS         = main.c mvtd.c generator.c exclude.c receiver.c options.c
 OBJS         = $(SRCS:.c=.o)
-TARGET       = mtd
+TARGET       = mvtd
 
 .PHONY: all clean install uninstall dist distclean
 
