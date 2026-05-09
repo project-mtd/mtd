@@ -20,10 +20,19 @@ jobs:
 
     - name: Prepare Source Tarball
       run: |
-        # Membuat file tar.gz dari source code
         export PKG_NAME=mtd
         export PKG_VER=${{ github.ref_name }}
-        tar -cvzf ${PKG_NAME}-${PKG_VER}.tar.gz --exclude='.git*' .
+        # 1. Bersihkan cache autoconf agar tidak masuk ke tarball
+        rm -rf autom4te.cache config.log config.status config.h Makefile
+        # 2. Buat tarball di direktori satu level di atas (agar tidak berubah saat dibaca)
+        # Atau gunakan flag --exclude untuk file tarball itu sendiri
+        tar -cvzf ../${PKG_NAME}-${PKG_VER}.tar.gz \
+            --exclude="./${PKG_NAME}-${PKG_VER}.tar.gz" \
+            --exclude='./.git*' \
+            --exclude='./.github' \
+            .
+        # 3. Pindahkan kembali ke direktori kerja untuk langkah selanjutnya
+        mv ../${PKG_NAME}-${PKG_VER}.tar.gz .
 
     - name: Generate SHA256 Checksum
       run: |
